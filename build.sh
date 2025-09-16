@@ -1,31 +1,14 @@
-yarn build react/index,react-dom/index,react-server-dom-bun,scheduler --type=NODE
+yarn build react/index,react/jsx-dev-runtime,react/jsx-runtime,react-dom/index,react-dom/client,react-dom/server.node,react-server-dom-bun --type=NODE
+yarn build react/index,react/jsx-dev-runtime,react/jsx-runtime,react-dom/index --type=NODE_REACT_SERVER
 
-# pack react
-cd build/oss-stable/react
-bun pm pack --filename tarball-react.tgz
-TARBALL_REACT=$(pwd)/tarball-react.tgz
-echo $TARBALL_REACT
+TARGET_DIR=/Users/ali/code/bun/default/packages/bun-framework-react/node_modules
 
-# pack react-dom
-cd ../react-dom
-bun pm pack --filename tarball-react-dom.tgz
-TARBALL_REACT_DOM=$(pwd)/tarball-react-dom.tgz
-echo $TARBALL_REACT_DOM
+rm -rf $TARGET_DIR/react
+rm -rf $TARGET_DIR/react-dom
+rm -rf $TARGET_DIR/react-server-dom-bun
 
-# pack react-server-dom-bun
-cd ../react-server-dom-bun
-bun pm pack --filename tarball-react-server-dom-bun.tgz
-TARBALL_REACT_SERVER_DOM_BUN=$(pwd)/tarball-react-server-dom-bun.tgz
-echo $TARBALL_REACT_SERVER_DOM_BUN
+cp -r build/oss-stable/react $TARGET_DIR/react
+cp -r build/oss-stable/react-dom $TARGET_DIR/react-dom
+cp -r build/oss-stable/react-server-dom-bun $TARGET_DIR/react-server-dom-bun
 
-# pack scheduler
-cd ../scheduler
-bun pm pack --filename tarball-scheduler.tgz
-TARBALL_SCHEDULER=$(pwd)/tarball-scheduler.tgz
-echo $TARBALL_SCHEDULER
-
-cd /Users/ali/code/bun/default/packages/bun-framework-react
-bun remove react react-dom react-server-dom-bun scheduler
-
-echo install command is:
-echo bun add react@$TARBALL_REACT react-dom@$TARBALL_REACT_DOM react-server-dom-bun@$TARBALL_REACT_SERVER_DOM_BUN scheduler@$TARBALL_SCHEDULER
+echo "Packages copied to $TARGET_DIR"
