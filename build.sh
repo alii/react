@@ -6,8 +6,8 @@ rm -rf $TARGET_DIR/react
 rm -rf $TARGET_DIR/react-dom
 rm -rf $TARGET_DIR/react-server-dom-bun
 
-cp -r build/node_modules/react $TARGET_DIR/react
-cp -r build/node_modules/react-dom $TARGET_DIR/react-dom
-cp -r build/node_modules/react-server-dom-bun $TARGET_DIR/react-server-dom-bun
+cp -r build/oss-stable/react $TARGET_DIR/react
+cp -r build/oss-stable/react-dom $TARGET_DIR/react-dom
+cp -r build/oss-stable/react-server-dom-bun $TARGET_DIR/react-server-dom-bun
 
 echo "Packages copied to $TARGET_DIR"
