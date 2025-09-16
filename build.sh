@@ -1,4 +1,3 @@
-# Build command (uncomment to build):
 yarn build react/index,react-dom/index,react-server-dom-bun,scheduler --type=NODE
 
 # pack react
