@@ -80,6 +80,7 @@ function createDrainHandler(destination: Destination, request: Request) {
 function createCancelHandler(request: Request, reason: string) {
   return () => {
     stopFlowing(request);
+    // eslint-disable-next-line react-internal/prod-error-codes
     abort(request, new Error(reason));
   };
 }
@@ -112,6 +113,7 @@ function startReadingFromDebugChannelReadable(
   function onError(error: mixed) {
     abort(
       request,
+      // eslint-disable-next-line react-internal/prod-error-codes
       new Error('Lost connection to the Debug Channel.', {
         cause: error,
       }),
@@ -319,6 +321,7 @@ function startReadingFromDebugChannelReadableStream(
   function error(e: any) {
     abort(
       request,
+      // eslint-disable-next-line react-internal/prod-error-codes
       new Error('Lost connection to the Debug Channel.', {
         cause: e,
       }),
@@ -575,6 +578,7 @@ function decodeReplyFromBusboy<T>(
   });
   busboyStream.on('file', (name, value, {filename, encoding, mimeType}) => {
     if (encoding.toLowerCase() === 'base64') {
+      // eslint-disable-next-line react-internal/prod-error-codes
       throw new Error(
         "React doesn't accept base64 encoded file uploads because we don't expect " +
           "form data passed from a browser to ever encode data that way. If that's " +

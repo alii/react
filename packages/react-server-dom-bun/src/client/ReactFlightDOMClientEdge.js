@@ -52,6 +52,7 @@ export {createTemporaryReferenceSet} from 'react-client/src/ReactFlightTemporary
 export type {TemporaryReferenceSet};
 
 function noServerCall() {
+  // eslint-disable-next-line react-internal/prod-error-codes
   throw new Error(
     'Server Functions cannot be called during initial render. ' +
       'This would create a fetch waterfall. Try to use a Server Component ' +

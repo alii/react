@@ -100,6 +100,7 @@ function startReadingFromDebugChannelReadableStream(
   function error(e: any) {
     abort(
       request,
+      // eslint-disable-next-line react-internal/prod-error-codes
       new Error('Lost connection to the Debug Channel.', {
         cause: e,
       }),

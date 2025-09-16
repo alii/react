@@ -7,4 +7,5 @@
  * @flow
  */
 
+// eslint-disable-next-line react-internal/prod-error-codes
 throw new Error('Use react-server-dom-bun/client instead.');

@@ -27,7 +27,7 @@ import {prepareDestinationForModuleImpl} from 'react-client/src/ReactFlightClien
 export opaque type ClientReferenceMetadata = [
   string, // module path
   string, // export name
-  boolean?, // async
+  boolean, // async
 ];
 
 // eslint-disable-next-line no-unused-vars
@@ -72,6 +72,7 @@ export function resolveServerReference<T>(
   const exportName = id.slice(idx + 1);
   const fullURL = id.slice(0, idx);
   if (!fullURL.startsWith(baseURL)) {
+    // eslint-disable-next-line react-internal/prod-error-codes
     throw new Error(
       'Attempted to load a Server Reference outside the hosted root.',
     );
@@ -138,6 +139,7 @@ export function requireModule<T>(metadata: ClientReference<T>): T {
       throw moduleExports.reason;
     }
   } else {
+    // eslint-disable-next-line react-internal/prod-error-codes
     throw new Error(
       'Module "' + metadata.specifier + '" must be preloaded before use.',
     );

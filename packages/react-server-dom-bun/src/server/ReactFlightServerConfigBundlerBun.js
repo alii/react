@@ -7,7 +7,6 @@
  * @flow
  */
 
-import type {ReactClientValue} from 'react-server/src/ReactFlightServer';
 import type {
   ClientReference,
   ServerReference,
@@ -25,8 +24,6 @@ import {
   getServerReferenceId,
   getServerReferenceBoundArguments,
 } from '../ReactFlightBunReferences';
-
-import isArray from 'shared/isArray';
 
 type ServerConsumerManifest = mixed;
 
@@ -59,11 +56,11 @@ export type ServerManifest = mixed;
 export type Hints = null;
 
 export type HintCode = string;
-export type HintModel<T: HintCode> = null;
+export type HintModel = null;
 
 export function dispatchHint<Code: HintCode>(
   code: Code,
-  model: HintModel<Code>,
+  model: HintModel,
 ): void {
   // Hints are not supported in Bun yet
 }

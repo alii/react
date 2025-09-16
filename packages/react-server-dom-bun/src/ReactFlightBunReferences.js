@@ -103,7 +103,10 @@ export function registerServerReference<T: Function>(
       configurable: true,
     },
     $$bound: {value: null, configurable: true},
-    $$location: {value: __DEV__ ? Error.captureStackTrace && new Error() : undefined, configurable: true},
+    $$location: {
+      value: __DEV__ ? Error.captureStackTrace && new Error() : undefined,
+      configurable: true,
+    },
     bind: {value: bind, configurable: true},
   });
 }
