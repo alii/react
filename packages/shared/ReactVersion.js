@@ -1,1 +1,1 @@
-export default '19.2.0-canary-4f4b2ccf-20250916';
+export default '19.2.0-canary-5996cdef-20250916';

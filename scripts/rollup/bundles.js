@@ -617,18 +617,6 @@ const bundles = [
       'util',
     ],
   },
-  {
-    bundleTypes: [NODE_DEV, NODE_PROD],
-    moduleType: RENDERER,
-    entry: 'react-server-dom-bun/src/server/react-flight-dom-server.edge',
-    name: 'react-server-dom-bun-server.edge',
-    condition: 'react-server',
-    global: 'ReactServerDOMServer',
-    minifyWithProdErrorCodes: false,
-    wrapWithModuleBoundaries: false,
-    externals: ['react'],
-  },
-
   /******* React Server DOM Bun Client *******/
   {
     bundleTypes: [NODE_DEV, NODE_PROD],
@@ -650,17 +638,6 @@ const bundles = [
     wrapWithModuleBoundaries: false,
     externals: ['react', 'react-dom', 'util', 'crypto'],
   },
-  {
-    bundleTypes: [NODE_DEV, NODE_PROD],
-    moduleType: RENDERER,
-    entry: 'react-server-dom-bun/src/client/react-flight-dom-client.edge',
-    name: 'react-server-dom-bun-client.edge',
-    global: 'ReactServerDOMClient',
-    minifyWithProdErrorCodes: false,
-    wrapWithModuleBoundaries: false,
-    externals: ['react', 'react-dom'],
-  },
-
   /******* React Server DOM Turbopack Server *******/
   {
     bundleTypes: [NODE_DEV, NODE_PROD],

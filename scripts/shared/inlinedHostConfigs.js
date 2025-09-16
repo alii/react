@@ -391,8 +391,6 @@ module.exports = [
       'react-dom/static.edge',
       'react-server-dom-webpack/src/client/react-flight-dom-client.edge',
       'react-server-dom-webpack/src/server/react-flight-dom-server.edge',
-      'react-server-dom-bun/src/client/react-flight-dom-client.edge',
-      'react-server-dom-bun/src/server/react-flight-dom-server.edge',
     ],
     paths: [
       'react-dom',
@@ -419,13 +417,6 @@ module.exports = [
       'react-server-dom-webpack/src/client/react-flight-dom-client.edge',
       'react-server-dom-webpack/src/server/react-flight-dom-server.edge',
       'react-server-dom-webpack/src/server/ReactFlightDOMServerEdge.js', // react-server-dom-webpack/src/server/react-flight-dom-server.edge
-      'react-server-dom-bun/client.edge',
-      'react-server-dom-bun/server.edge',
-      'react-server-dom-bun/static.edge',
-      'react-server-dom-bun/src/client/ReactFlightDOMClientEdge.js',
-      'react-server-dom-bun/src/client/react-flight-dom-client.edge',
-      'react-server-dom-bun/src/server/react-flight-dom-server.edge',
-      'react-server-dom-bun/src/server/ReactFlightDOMServerEdge.js',
       'react-devtools',
       'react-devtools-core',
       'react-devtools-shell',

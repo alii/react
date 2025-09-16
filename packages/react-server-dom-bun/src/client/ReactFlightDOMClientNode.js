@@ -7,7 +7,7 @@
  * @flow
  */
 
-import type {Thenable, ReactCustomFormAction} from 'shared/ReactTypes.js';
+import type {ReactCustomFormAction, Thenable} from 'shared/ReactTypes.js';
 
 import type {
   DebugChannel,
@@ -16,8 +16,8 @@ import type {
 } from 'react-client/src/ReactFlightClient';
 
 import type {
-  ServerConsumerModuleMap,
   ModuleLoading,
+  ServerConsumerModuleMap,
   ServerManifest,
 } from 'react-client/src/ReactFlightClientConfig';
 
@@ -30,16 +30,28 @@ type ServerConsumerManifest = {
 import type {Readable} from 'stream';
 
 import {
+  close,
   createResponse,
   createStreamState,
   getRoot,
-  reportGlobalError,
-  processStringChunk,
   processBinaryChunk,
-  close,
+  processStringChunk,
+  reportGlobalError,
 } from 'react-client/src/ReactFlightClient';
 
-export * from './ReactFlightDOMClientEdge';
+import type {ReactServerValue} from 'react-client/src/ReactFlightReplyClient';
+import {processReply} from 'react-client/src/ReactFlightReplyClient';
+
+export {
+  createServerReference,
+  registerServerReference,
+} from 'react-client/src/ReactFlightReplyClient';
+
+import type {TemporaryReferenceSet} from 'react-client/src/ReactFlightTemporaryReferences';
+
+export {createTemporaryReferenceSet} from 'react-client/src/ReactFlightTemporaryReferences';
+
+export type {TemporaryReferenceSet};
 
 function noServerCall() {
   // eslint-disable-next-line react-internal/prod-error-codes
@@ -134,4 +146,35 @@ function createFromNodeStream<T>(
   return getRoot(response);
 }
 
-export {createFromNodeStream};
+function encodeReply(
+  value: ReactServerValue,
+  options?: {temporaryReferences?: TemporaryReferenceSet, signal?: AbortSignal},
+): Promise<
+  string | URLSearchParams | FormData,
+> /* We don't use URLSearchParams yet but maybe */ {
+  return new Promise((resolve, reject) => {
+    const abort = processReply(
+      value,
+      '',
+      options && options.temporaryReferences
+        ? options.temporaryReferences
+        : undefined,
+      resolve,
+      reject,
+    );
+    if (options && options.signal) {
+      const signal = options.signal;
+      if (signal.aborted) {
+        abort((signal: any).reason);
+      } else {
+        const listener = () => {
+          abort((signal: any).reason);
+          signal.removeEventListener('abort', listener);
+        };
+        signal.addEventListener('abort', listener);
+      }
+    }
+  });
+}
+
+export {createFromNodeStream, encodeReply};
