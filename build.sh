@@ -1,4 +1,3 @@
-# Build everything we need, explicitly including react-server bundles by name
 yarn build react/index,react/jsx-dev-runtime,react/jsx-runtime,react.react-server,react-jsx-dev-runtime.react-server,react-jsx-runtime.react-server,react-dom/index,react-dom/client,react-dom/server.node,react-dom-server.node,react-dom-server-legacy.node,react-dom.react-server,react-server-dom-bun,scheduler/index
 
 TARGET_DIR=/Users/ali/code/bun/default/packages/bun-framework-react/node_modules
