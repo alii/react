@@ -111,43 +111,7 @@ export function registerServerReference<T: Function>(
   });
 }
 
-// This is the Bun-specific module map type
-export type ClientManifest = {
-  [id: string]: ClientReferenceMetadata,
-};
-
-export type ServerReferenceId = string;
-export type ClientReferenceMetadata = {
-  id: string,
-  chunks: Array<string>,
-  name: string,
-  async: boolean,
-};
-
-export type ClientReferenceKey = string;
-
-export function getClientReferenceKey(
-  reference: ClientReference<any>,
-): ClientReferenceKey {
-  return reference.$$id;
-}
-
-export function resolveClientReferenceMetadata<T>(
-  config: ClientManifest,
-  clientReference: ClientReference<T>,
-): ClientReferenceMetadata {
-  const modulePath = clientReference.$$id;
-  const idx = modulePath.lastIndexOf('#');
-  const exportName = modulePath.slice(idx + 1);
-  const id = modulePath.slice(0, idx);
-
-  return {
-    id: id,
-    chunks: [],
-    name: exportName,
-    async: clientReference.$$async === true,
-  };
-}
+export type ServerManifest = mixed;
 
 export function getServerReferenceId<T>(
   config: ServerManifest,
@@ -163,7 +127,12 @@ export function getServerReferenceBoundArguments<T>(
   return serverReference.$$bound;
 }
 
-export type ServerManifest = mixed;
+export function getServerReferenceLocation<T>(
+  config: ServerManifest,
+  serverReference: ServerReference<T>,
+): void | Error {
+  return serverReference.$$location;
+}
 
 // Re-export the proxy creation function
 export function createClientModuleProxy<T>(

@@ -7,43 +7,71 @@
  * @flow
  */
 
+import type {ReactClientValue} from 'react-server/src/ReactFlightServer';
+
 import type {
   ClientReference,
   ServerReference,
-  ClientReferenceMetadata,
-  ServerReferenceId,
 } from '../ReactFlightBunReferences';
 
-import type {ClientManifest} from '../ReactFlightBunReferences';
-import type {ClientReferenceKey} from '../ReactFlightBunReferences';
+export type {ClientReference, ServerReference};
 
-import {
-  isClientReference,
-  getClientReferenceKey,
-  resolveClientReferenceMetadata,
-  getServerReferenceId,
-  getServerReferenceBoundArguments,
-} from '../ReactFlightBunReferences';
+// Bun uses a base URL like ESM for simplicity
+export type ClientManifest = string; // base URL
 
-type ServerConsumerManifest = mixed;
+export type ServerReferenceId = string;
 
-export type {
-  ClientReference,
-  ServerReference,
-  ClientReferenceMetadata,
-  ServerReferenceId,
-  ClientReferenceKey,
-  ClientManifest,
-  ServerConsumerManifest,
-};
+// Simple tuple format like ESM: [modulePath, exportName, async?]
+export type ClientReferenceMetadata = [
+  string, // module path
+  string, // export name
+  boolean, // async
+];
+
+export type ClientReferenceKey = string;
 
 export {
   isClientReference,
-  getClientReferenceKey,
-  resolveClientReferenceMetadata,
-  getServerReferenceId,
-  getServerReferenceBoundArguments,
-};
+  isServerReference,
+} from '../ReactFlightBunReferences';
+
+export function getClientReferenceKey(
+  reference: ClientReference<any>,
+): ClientReferenceKey {
+  return reference.$$id;
+}
+
+export function resolveClientReferenceMetadata<T>(
+  config: ClientManifest,
+  clientReference: ClientReference<T>,
+): ClientReferenceMetadata {
+  const id = clientReference.$$id;
+  const idx = id.lastIndexOf('#');
+  const exportName = id.slice(idx + 1);
+  const modulePath = id.slice(0, idx);
+  return [modulePath, exportName, clientReference.$$async === true];
+}
+
+export function getServerReferenceId<T>(
+  config: ClientManifest,
+  serverReference: ServerReference<T>,
+): ServerReferenceId {
+  return serverReference.$$id;
+}
+
+export function getServerReferenceBoundArguments<T>(
+  config: ClientManifest,
+  serverReference: ServerReference<T>,
+): null | Array<ReactClientValue> {
+  return serverReference.$$bound;
+}
+
+export function getServerReferenceLocation<T>(
+  config: ClientManifest,
+  serverReference: ServerReference<T>,
+): void | Error {
+  return serverReference.$$location;
+}
 
 export type SSRModuleMap = null | {
   [clientId: string]: {

@@ -10,7 +10,7 @@
 import type {Request} from 'react-server/src/ReactFlightServer';
 import type {ReactComponentInfo} from 'shared/ReactTypes';
 
-export * from '../ReactFlightServerConfigBundlerCustom';
+export * from 'react-server-dom-bun/src/server/ReactFlightServerConfigBundlerBun';
 export * from 'react-dom-bindings/src/server/ReactFlightServerConfigDOM';
 
 export const supportsRequestStorage = false;

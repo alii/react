@@ -16,14 +16,14 @@ import type {
 
 import type {ModuleLoading} from 'react-client/src/ReactFlightClientConfig';
 
+// Bun uses a base URL like ESM
 export type ServerConsumerModuleMap = string; // Module root path
-
 export type ServerManifest = string; // Module root path
-
 export type ServerReferenceId = string;
 
 import {prepareDestinationForModuleImpl} from 'react-client/src/ReactFlightClientConfig';
 
+// Simple tuple format matching server config
 export opaque type ClientReferenceMetadata = [
   string, // module path
   string, // export name
