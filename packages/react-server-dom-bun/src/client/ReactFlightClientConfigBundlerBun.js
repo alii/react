@@ -16,8 +16,10 @@ import type {
 
 import type {ModuleLoading} from 'react-client/src/ReactFlightClientConfig';
 
-// Bun uses a base URL like ESM
-export type ServerConsumerModuleMap = string; // Module root path
+// Bun can use either a base URL (like ESM) or a manifest object (like webpack)
+export type ServerConsumerModuleMap =
+  | string
+  | {[id: string]: {[exportName: string]: {specifier: string, name: string}}};
 export type ServerManifest = string; // Module root path
 export type ServerReferenceId = string;
 
@@ -55,11 +57,40 @@ export function resolveClientReference<T>(
   bundlerConfig: ServerConsumerModuleMap,
   metadata: ClientReferenceMetadata,
 ): ClientReference<T> {
+  const modulePath = metadata[0];
+  const exportName = metadata[1];
+  const isAsync = metadata[2];
+
+  if (typeof bundlerConfig === 'object' && bundlerConfig) {
+    const moduleEntry = bundlerConfig[modulePath];
+
+    if (moduleEntry) {
+      const exportEntry =
+        moduleEntry[exportName] || moduleEntry['*'] || moduleEntry.default;
+      if (exportEntry && exportEntry.specifier) {
+        return {
+          specifier: exportEntry.specifier,
+          name: exportName,
+          async: isAsync,
+        };
+      }
+    }
+    // If not found in manifest, throw an error like webpack does
+    // eslint-disable-next-line react-internal/prod-error-codes
+    throw new Error(
+      'Could not find the module "' +
+        modulePath +
+        '" in the React Server Consumer Manifest. ' +
+        'This is probably a bug in the React Server Components bundler.',
+    );
+  }
+
+  // If bundlerConfig is a string (base URL), concatenate
   const baseURL = bundlerConfig;
   return {
-    specifier: baseURL + metadata[0],
-    name: metadata[1],
-    async: metadata[2],
+    specifier: baseURL + modulePath,
+    name: exportName,
+    async: isAsync,
   };
 }
 
