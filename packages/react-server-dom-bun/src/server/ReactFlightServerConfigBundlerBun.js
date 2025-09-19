@@ -16,18 +16,14 @@ import type {
 
 export type {ClientReference, ServerReference};
 
-// Bun can use either a base URL (like ESM) or a manifest object (like webpack)
-// The manifest object maps source file IDs to client bundle metadata
-export type ClientManifest =
-  | string
-  | {
-      [id: string]: {
-        [exportName: string]: {
-          specifier: string,
-          name: string,
-        },
-      },
-    };
+// Bun uses composite keys like "module#export" for the manifest
+export type ClientManifest = {
+  [compositeKey: string]: {
+    id: string,
+    name: string,
+    chunks: Array<string>,
+  },
+};
 
 export type ServerReferenceId = string;
 
@@ -58,19 +54,10 @@ export function resolveClientReferenceMetadata<T>(
   const id = clientReference.$$id;
   const idx = id.lastIndexOf('#');
   const exportName = id.slice(idx + 1);
-  let modulePath = id.slice(0, idx);
 
-  // If config is a manifest object, resolve the module path through it
-  if (typeof config === 'object' && config) {
-    const moduleEntry = config[modulePath];
-
-    if (moduleEntry) {
-      const exportEntry = moduleEntry[exportName] || moduleEntry.default;
-      if (exportEntry && exportEntry.specifier) {
-        modulePath = exportEntry.specifier;
-      }
-    }
-  }
+  // Look up the composite key in the manifest
+  const entry = config[id];
+  const modulePath = entry ? entry.id : id.slice(0, idx);
 
   return [modulePath, exportName, clientReference.$$async === true];
 }

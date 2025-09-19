@@ -51,6 +51,7 @@ export type Options = {
   findSourceMapURL?: FindSourceMapURLCallback,
   replayConsoleLogs?: boolean,
   environmentName?: string,
+  moduleMap?: ServerConsumerModuleMap,
 };
 
 function createDebugCallbackFromWritableStream(
@@ -86,7 +87,7 @@ function createResponseFromOptions(options: void | Options) {
       : undefined;
 
   return createResponse(
-    null,
+    options && options.moduleMap ? options.moduleMap : null,
     null,
     null,
     options && options.callServer ? options.callServer : undefined,

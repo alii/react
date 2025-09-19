@@ -16,10 +16,15 @@ import type {
 
 import type {ModuleLoading} from 'react-client/src/ReactFlightClientConfig';
 
-// Bun can use either a base URL (like ESM) or a manifest object (like webpack)
-export type ServerConsumerModuleMap =
-  | string
-  | {[id: string]: {[exportName: string]: {specifier: string, name: string}}};
+// Bun's SSR manifest structure
+export type ServerConsumerModuleMap = {
+  [id: string]: {
+    [exportName: string]: {
+      specifier: string,
+      name: string,
+    },
+  },
+};
 export type ServerManifest = string; // Module root path
 export type ServerReferenceId = string;
 
@@ -61,21 +66,20 @@ export function resolveClientReference<T>(
   const exportName = metadata[1];
   const isAsync = metadata[2];
 
-  if (typeof bundlerConfig === 'object' && bundlerConfig) {
-    const moduleEntry = bundlerConfig[modulePath];
+  // If no bundlerConfig (browser case), use metadata directly
+  if (!bundlerConfig) {
+    return {
+      specifier: modulePath,
+      name: exportName,
+      async: isAsync,
+    };
+  }
 
-    if (moduleEntry) {
-      const exportEntry =
-        moduleEntry[exportName] || moduleEntry['*'] || moduleEntry.default;
-      if (exportEntry && exportEntry.specifier) {
-        return {
-          specifier: exportEntry.specifier,
-          name: exportName,
-          async: isAsync,
-        };
-      }
-    }
-    // If not found in manifest, throw an error like webpack does
+  // The ssrManifest from Bun has the structure:
+  // { "pages/index.tsx": { "default": { specifier: "ssr:pages/index.tsx", name: "default" } } }
+  const moduleEntry = bundlerConfig[modulePath];
+
+  if (!moduleEntry) {
     // eslint-disable-next-line react-internal/prod-error-codes
     throw new Error(
       'Could not find the module "' +
@@ -85,11 +89,23 @@ export function resolveClientReference<T>(
     );
   }
 
-  // If bundlerConfig is a string (base URL), concatenate
-  const baseURL = bundlerConfig;
+  const exportEntry =
+    moduleEntry[exportName] || moduleEntry['*'] || moduleEntry.default;
+
+  if (!exportEntry || !exportEntry.specifier) {
+    // eslint-disable-next-line react-internal/prod-error-codes
+    throw new Error(
+      'Could not find the export "' +
+        exportName +
+        '" in module "' +
+        modulePath +
+        '" in the React Server Consumer Manifest.',
+    );
+  }
+
   return {
-    specifier: baseURL + modulePath,
-    name: exportName,
+    specifier: exportEntry.specifier,
+    name: exportEntry.name,
     async: isAsync,
   };
 }
