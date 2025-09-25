@@ -620,7 +620,8 @@ const bundles = [
   {
     bundleTypes: [NODE_DEV, NODE_PROD],
     moduleType: RENDERER,
-    entry: 'react-server-dom-bun/src/server/react-flight-dom-server.node.unbundled',
+    entry:
+      'react-server-dom-bun/src/server/react-flight-dom-server.node.unbundled',
     name: 'react-server-dom-bun-server.node.unbundled',
     condition: 'react-server',
     global: 'ReactServerDOMServer',
@@ -659,7 +660,8 @@ const bundles = [
   {
     bundleTypes: [NODE_DEV, NODE_PROD],
     moduleType: RENDERER,
-    entry: 'react-server-dom-bun/src/client/react-flight-dom-client.node.unbundled',
+    entry:
+      'react-server-dom-bun/src/client/react-flight-dom-client.node.unbundled',
     name: 'react-server-dom-bun-client.node.unbundled',
     global: 'ReactServerDOMClient',
     minifyWithProdErrorCodes: false,
@@ -1317,31 +1319,31 @@ const bundles = [
   },
 
   /******* ESLint Plugin for Hooks *******/
-  {
-    // TODO: we're building this from typescript source now, but there's really
-    // no reason to have both dev and prod for this package.  It's
-    // currently required in order for the package to be copied over correctly.
-    // So, it would be worth improving that flow.
-    name: 'eslint-plugin-react-hooks',
-    bundleTypes: [NODE_DEV, NODE_PROD, CJS_DTS],
-    moduleType: ISOMORPHIC,
-    entry: 'eslint-plugin-react-hooks/src/index.ts',
-    global: 'ESLintPluginReactHooks',
-    minifyWithProdErrorCodes: false,
-    wrapWithModuleBoundaries: false,
-    preferBuiltins: true,
-    externals: [
-      '@babel/core',
-      '@babel/plugin-proposal-private-methods',
-      'hermes-parser',
-      'zod',
-      'zod-validation-error',
-      'crypto',
-      'util',
-    ],
-    tsconfig: './packages/eslint-plugin-react-hooks/tsconfig.json',
-    prebuild: `mkdir -p ./compiler/packages/babel-plugin-react-compiler/dist && echo "module.exports = require('../src/index.ts');" > ./compiler/packages/babel-plugin-react-compiler/dist/index.js`,
-  },
+  // {
+  //   // TODO: we're building this from typescript source now, but there's really
+  //   // no reason to have both dev and prod for this package.  It's
+  //   // currently required in order for the package to be copied over correctly.
+  //   // So, it would be worth improving that flow.
+  //   name: 'eslint-plugin-react-hooks',
+  //   bundleTypes: [NODE_DEV, NODE_PROD, CJS_DTS],
+  //   moduleType: ISOMORPHIC,
+  //   entry: 'eslint-plugin-react-hooks/src/index.ts',
+  //   global: 'ESLintPluginReactHooks',
+  //   minifyWithProdErrorCodes: false,
+  //   wrapWithModuleBoundaries: false,
+  //   preferBuiltins: true,
+  //   externals: [
+  //     '@babel/core',
+  //     '@babel/plugin-proposal-private-methods',
+  //     'hermes-parser',
+  //     'zod',
+  //     'zod-validation-error',
+  //     'crypto',
+  //     'util',
+  //   ],
+  //   tsconfig: './packages/eslint-plugin-react-hooks/tsconfig.json',
+  //   prebuild: `mkdir -p ./compiler/packages/babel-plugin-react-compiler/dist && echo "module.exports = require('../src/index.ts');" > ./compiler/packages/babel-plugin-react-compiler/dist/index.js`,
+  // },
 
   /******* React Fresh *******/
   {
