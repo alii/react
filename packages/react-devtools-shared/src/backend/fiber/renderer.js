@@ -460,10 +460,10 @@ export function getInternalReactConstants(version: string): {
       IncompleteFunctionComponent: 28,
       IndeterminateComponent: 2, // removed in 19.0.0
       LazyComponent: 16,
-      LegacyHiddenComponent: 23,
+      LegacyHiddenComponent: 23, // Does not exist in 18+ OSS but exists in fb builds
       MemoComponent: 14,
       Mode: 8,
-      OffscreenComponent: 22, // Experimental
+      OffscreenComponent: 22, // Experimental in 17. Stable in 18+
       Profiler: 12,
       ScopeComponent: 21, // Experimental
       SimpleMemoComponent: 15,
@@ -2886,9 +2886,16 @@ export function attach(
     previousSuspendedBy: null | Array<ReactAsyncInfo>,
     parentSuspenseNode: null | SuspenseNode,
   ): void {
-    // Remove any async info from the parent, if they were in the previous set but
+    // Remove any async info if they were in the previous set but
     // is no longer in the new set.
-    if (previousSuspendedBy !== null && parentSuspenseNode !== null) {
+    // If we just reconciled a SuspenseNode, we need to remove from that node instead of the parent.
+    // This is different from inserting because inserting is done during reconiliation
+    // whereas removal is done after we're done reconciling.
+    const suspenseNode =
+      instance.suspenseNode === null
+        ? parentSuspenseNode
+        : instance.suspenseNode;
+    if (previousSuspendedBy !== null && suspenseNode !== null) {
       const nextSuspendedBy = instance.suspendedBy;
       for (let i = 0; i < previousSuspendedBy.length; i++) {
         const asyncInfo = previousSuspendedBy[i];
@@ -2901,7 +2908,7 @@ export function attach(
           // This IO entry is no longer blocking the current tree.
           // Let's remove it from the parent SuspenseNode.
           const ioInfo = asyncInfo.awaited;
-          const suspendedBySet = parentSuspenseNode.suspendedBy.get(ioInfo);
+          const suspendedBySet = suspenseNode.suspendedBy.get(ioInfo);
 
           if (
             suspendedBySet === undefined ||
@@ -2928,16 +2935,16 @@ export function attach(
             }
           }
           if (suspendedBySet !== undefined && suspendedBySet.size === 0) {
-            parentSuspenseNode.suspendedBy.delete(asyncInfo.awaited);
+            suspenseNode.suspendedBy.delete(asyncInfo.awaited);
           }
           if (
-            parentSuspenseNode.hasUniqueSuspenders &&
-            !ioExistsInSuspenseAncestor(parentSuspenseNode, ioInfo)
+            suspenseNode.hasUniqueSuspenders &&
+            !ioExistsInSuspenseAncestor(suspenseNode, ioInfo)
           ) {
             // This entry wasn't in any ancestor and is no longer in this suspense boundary.
             // This means that a child might now be the unique suspender for this IO.
             // Search the child boundaries to see if we can reveal any of them.
-            unblockSuspendedBy(parentSuspenseNode, ioInfo);
+            unblockSuspendedBy(suspenseNode, ioInfo);
           }
         }
       }
@@ -3057,13 +3064,23 @@ export function attach(
     }
   }
 
+  function isHiddenOffscreen(fiber: Fiber): boolean {
+    switch (fiber.tag) {
+      case LegacyHiddenComponent:
+      // fallthrough since all published implementations currently implement the same state as Offscreen.
+      case OffscreenComponent:
+        return fiber.memoizedState !== null;
+      default:
+        return false;
+    }
+  }
+
   function unmountRemainingChildren() {
     if (
       reconcilingParent !== null &&
       (reconcilingParent.kind === FIBER_INSTANCE ||
         reconcilingParent.kind === FILTERED_FIBER_INSTANCE) &&
-      reconcilingParent.data.tag === OffscreenComponent &&
-      reconcilingParent.data.memoizedState !== null &&
+      isHiddenOffscreen(reconcilingParent.data) &&
       !isInDisconnectedSubtree
     ) {
       // This is a hidden offscreen, we need to execute this in the context of a disconnected subtree.
@@ -3170,8 +3187,7 @@ export function attach(
       if (
         (parent.kind === FIBER_INSTANCE ||
           parent.kind === FILTERED_FIBER_INSTANCE) &&
-        parent.data.tag === OffscreenComponent &&
-        parent.data.memoizedState !== null
+        isHiddenOffscreen(parent.data)
       ) {
         // We're inside a hidden offscreen Fiber. We're in a disconnected tree.
         return;
@@ -3819,7 +3835,9 @@ export function attach(
       (reconcilingParent !== null &&
         reconcilingParent.kind === VIRTUAL_INSTANCE) ||
       fiber.tag === SuspenseComponent ||
-      fiber.tag === OffscreenComponent // Use to keep resuspended instances alive inside a SuspenseComponent.
+      // Use to keep resuspended instances alive inside a SuspenseComponent.
+      fiber.tag === OffscreenComponent ||
+      fiber.tag === LegacyHiddenComponent
     ) {
       // If the parent is a Virtual Instance and we filtered this Fiber we include a
       // hidden node. We also include this if it's a Suspense boundary so we can track those
@@ -3939,7 +3957,7 @@ export function attach(
         trackDebugInfoFromHostComponent(nearestInstance, fiber);
       }
 
-      if (fiber.tag === OffscreenComponent && fiber.memoizedState !== null) {
+      if (isHiddenOffscreen(fiber)) {
         // If an Offscreen component is hidden, mount its children as disconnected.
         const stashedDisconnected = isInDisconnectedSubtree;
         isInDisconnectedSubtree = true;
@@ -4261,7 +4279,7 @@ export function attach(
     while (child !== null) {
       if (child.kind === FILTERED_FIBER_INSTANCE) {
         const fiber = child.data;
-        if (fiber.tag === OffscreenComponent && fiber.memoizedState !== null) {
+        if (isHiddenOffscreen(fiber)) {
           // The children of this Offscreen are hidden so they don't get added.
         } else {
           addUnfilteredChildrenIDs(child, nextChildren);
@@ -4888,9 +4906,8 @@ export function attach(
       const nextDidTimeOut =
         isLegacySuspense && nextFiber.memoizedState !== null;
 
-      const isOffscreen = nextFiber.tag === OffscreenComponent;
-      const prevWasHidden = isOffscreen && prevFiber.memoizedState !== null;
-      const nextIsHidden = isOffscreen && nextFiber.memoizedState !== null;
+      const prevWasHidden = isHiddenOffscreen(prevFiber);
+      const nextIsHidden = isHiddenOffscreen(nextFiber);
 
       if (isLegacySuspense) {
         if (
@@ -5245,8 +5262,7 @@ export function attach(
       if (
         (child.kind === FIBER_INSTANCE ||
           child.kind === FILTERED_FIBER_INSTANCE) &&
-        child.data.tag === OffscreenComponent &&
-        child.data.memoizedState !== null
+        isHiddenOffscreen(child.data)
       ) {
         // This instance's children are already disconnected.
       } else {
@@ -5275,8 +5291,7 @@ export function attach(
       if (
         (child.kind === FIBER_INSTANCE ||
           child.kind === FILTERED_FIBER_INSTANCE) &&
-        child.data.tag === OffscreenComponent &&
-        child.data.memoizedState !== null
+        isHiddenOffscreen(child.data)
       ) {
         // This instance's children should remain disconnected.
       } else {
